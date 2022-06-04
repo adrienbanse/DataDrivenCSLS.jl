@@ -38,3 +38,12 @@ function white_box_CJSR_upper_bound(hs, d)
     _, sosub = soslyapb(hs, d, optimizer_constructor = solver, tol = 1e-5)
     return sosub
 end
+
+# source: https://github.com/zhemingwang/DataDrivenSwitchControl/blob/master/src/WhiteBoxAnalysis.jl
+function white_box_JSR(s, d=2)
+    optimizer_constructor = optimizer_with_attributes(Mosek.Optimizer, MOI.Silent() => true)
+    soslyapb(s, d, optimizer_constructor=optimizer_constructor, tol=1e-4, verbose=0)
+    seq = sosbuildsequence(s, d, p_0=:Primal)
+    psw = findsmp(seq)
+    return psw.growthrate
+end
