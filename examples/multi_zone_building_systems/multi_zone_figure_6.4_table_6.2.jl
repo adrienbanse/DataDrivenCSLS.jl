@@ -1,6 +1,9 @@
 include(joinpath(@__DIR__, "../../src/DataDrivenCSLS.jl"))
 using Main.DataDrivenCSLS
 
+CtoK(C) = C + 273.15
+KtoC(K) = K - 273.15
+
 dim = 3; dim_in = 3
 c = 1375
 cp = 1.012
@@ -9,11 +12,11 @@ Ro12 = 3
 Ro3 = 2.7
 tau = 3 * 60
 m = 0.14
-T_target = 24
-Ts = 16
-To = 32
+T_target = CtoK(24)
+Ts = CtoK(16)
+To = CtoK(32)
 q = [.1, .1, .12]
-T_0 = [38, 34, 32]
+T_0 = CtoK.([38, 34, 32])
 nothing
 
 Σ_basis = []
@@ -102,7 +105,7 @@ add_transition!(G, 4, 2, maps_to_σ([false, true], [false, true]))
 add_transition!(G, 4, 3, maps_to_σ([false, true], [true, false]))
 add_transition!(G, 4, 4, maps_to_σ([false, true], [false, false]))
 
-N_MIN = 300 # to change if other total time
+N_MIN = 45 # to change if other total time
 
 total_time = N_MIN * 60
 time_range = (0:tau:total_time) ./ 60
@@ -134,12 +137,12 @@ for zone = 1:dim
     to_plot_controlled_nf = reshape(y_controlled_nf[zone, :, 1], (n_steps)) .+ T_target
     pushfirst!(to_plot, Tx[zone, 1])
     pushfirst!(to_plot_controlled_nf, x_controlled_nf[zone, 1] .+ T_target)
-    ax1.plot(time_range, to_plot, linestyle="-", color=colors[zone], label="\$T_{$(zone)}(t)\$ [°C]")
-    ax2.plot(time_range, to_plot_controlled_nf, linestyle="-", color=colors[zone], label="\$T_{$(zone)}(t)\$ [°C]")
+    ax1.plot(time_range, KtoC.(to_plot), linestyle="-", color=colors[zone], label="\$T_{$(zone)}(t)\$ [°C]")
+    ax2.plot(time_range, KtoC.(to_plot_controlled_nf), linestyle="-", color=colors[zone], label="\$T_{$(zone)}(t)\$ [°C]")
 end
 for ax in [ax1, ax2]
     ax.legend(fontsize=8)
-    ax.axhline(T_target, linestyle="--", color="grey")
+    ax.axhline(KtoC(T_target), linestyle="--", color="grey")
 end
 
 N_simul = 20
@@ -148,9 +151,9 @@ for i =1:N_simul
     for zone = 1:dim
         to_plot_controlled_f = reshape(y_controlled_f[zone, :, 1], (n_steps)) .+ T_target
         pushfirst!(to_plot_controlled_f, x_controlled_f[zone, 1] .+ T_target)
-        ax3.plot(time_range, to_plot_controlled_f, linestyle="-", linewidth = 0.7, alpha=0.3, color=colors[zone], label="\$T_{$(zone)}(t)\$ [°C]")
+        ax3.plot(time_range, KtoC.(to_plot_controlled_f), linestyle="-", linewidth = 0.7, alpha=0.3, color=colors[zone], label="\$T_{$(zone)}(t)\$ [°C]")
     end
-    if i == 1 ax3.legend(fontsize=8); ax3.axhline(T_target, linestyle="--", color="grey") end
+    if i == 1 ax3.legend(fontsize=8); ax3.axhline(KtoC(T_target), linestyle="--", color="grey") end
 end
 
 ax3.set_xlabel("\$t\$ [min]")
