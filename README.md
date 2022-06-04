@@ -41,6 +41,23 @@ y = reshape(y, l, size(x))
 lb_MQLF, ub_MQLF = bounds_MQLF(x, u, y, v, V, .975, .975, m)
 ```
 
+## Dependencies
+
+This module uses the following packages:
+* <code>LinearAlgebra</code>
+* <code>SwitchOnSafety</code>
+* <code>HybridSystems</code>
+* <code>StaticArrays</code>
+* <code>JuMP</code>
+* <code>MosekTools</code>
+* <code>Random</code>
+* <code>SpecialFunctions</code>
+* <code>LightGraphs</code>
+
+These packages are also used for the examples:
+* <code>DelimitedFiles</code>
+* <code>PyPlot</code>
+
 ## Sources
 
 This module was created in the context of my master's thesis at UCLouvain:
