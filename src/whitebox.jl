@@ -1,3 +1,10 @@
+"""
+    white_box_LQR(Σ, B, Q, R)
+
+Design a white-box LQR controller for ASLS x(t+1) = Ax(t) + Bu(t)
+with A in Σ, with ellipsoidal costs Q and R
+Note: it is sufficient for CSLSs as well
+"""
 function white_box_LQR(Σ, B, Q, R)
     dim, dim_in = size(B)
     lower_triangular(P) = [P[i, j] for i = 1:size(P, 1) for j = 1:i]
@@ -33,13 +40,25 @@ function white_box_LQR(Σ, B, Q, R)
     end
 end
 
+"""
+    white_box_CJSR_upper_bound(hs, d)
+
+Gives an upper bound on the CJSR of a CSLS hs::discreteswitchedsystem
+Computes SOS approximation with degree parameter d
+"""
 function white_box_CJSR_upper_bound(hs, d)
     solver = optimizer_with_attributes(Mosek.Optimizer, MOI.Silent() => true)
     _, sosub = soslyapb(hs, d, optimizer_constructor = solver, tol = 1e-5)
     return sosub
 end
 
-# source: https://github.com/zhemingwang/DataDrivenSwitchControl/blob/master/src/WhiteBoxAnalysis.jl
+"""
+    white_box_JSR(s, d)
+
+Gives an upper bound on the JSR of a ASLS s::discreteswitchedsystem
+Computes SOS approximation with degree parameter d
+Source: https://github.com/zhemingwang/DataDrivenSwitchControl/blob/master/src/WhiteBoxAnalysis.jl
+"""
 function white_box_JSR(s, d=2)
     optimizer_constructor = optimizer_with_attributes(Mosek.Optimizer, MOI.Silent() => true)
     soslyapb(s, d, optimizer_constructor=optimizer_constructor, tol=1e-4, verbose=0)

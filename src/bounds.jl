@@ -1,9 +1,29 @@
+# Sources: 
+# [BWJ22a]  Adrien Banse, Zheming Wang, Raphaël M. Jungers.
+#           Learning stability guarantees for data-driven constrained switching linear systems.
+#           arXiv pre-print: https://arxiv.org/abs/2205.00696
+# [BWJ22b]  Adrien Banse, Zheming Wang, Raphaël M. Jungers.
+#           Black-box stability analysis of hybrid systems with sample-based multiple Lyapunov functions.
+#           arXiv pre-print: https://arxiv.org/abs/2205.00699
+
+"""
+    δ(ε, dim)
+
+Spherical cap δ(ϵ) of dimension dim
+"""
 δ(ε, dim) = sqrt(1 - beta_inc_inv((dim - 1) / 2, 1 / 2, 2 * ε)[1])
 
 ################################################
 ##################### CQLF #####################
 ################################################
 
+"""
+    find_P_CQLF(solver, γ, x, y, l; C)
+
+JuMP model to find I <= P <= CI, P in S_n such that 
+for all (x, A) ∈ ω_N, LMIs (Ax)^T P (Ax) <= γ^2l x^T P x hold
+for a fixed value of γ, with specificed solver
+"""
 function find_P_CQLF(
     solver, γ, x, y, l;
     C = 1e6
@@ -16,7 +36,7 @@ function find_P_CQLF(
     @constraint(model, P in PSDCone())
     @constraint(model, P >= Matrix(I, dim, dim), PSDCone())
     @constraint(model, P <= C * Matrix(I, dim, dim), PSDCone())
-    # (x, (u, v, σ)) ∈ ω_N : (A_σx)^T P (A_σx) <= γ^2 x^T P x
+    # (x, A) ∈ ω_N : (Ax)^T P (Ax) <= γ^2l x^T P x
     @constraint(
         model, 
         [i = 1:N], 
@@ -25,6 +45,14 @@ function find_P_CQLF(
     return model 
 end
 
+"""
+    min_γ_CQLF(x, y, l; lb, ub, num_iter, tol)
+
+Bissection procedure with lower bound lb and upper bound ub
+to find minimal γ such that there exists I <= P <= CI that, 
+for all (x, A) ∈ ω_N, satisfies LMIs (Ax)^T P (Ax) <= γ^2l x^T P x
+Procedure stops if iter >= num_iter or ub - lb > tol
+"""
 function min_γ_CQLF(
     x, y, l; 
     lb = 0, ub = 3, num_iter = 1000, tol = 1e-4
@@ -50,6 +78,13 @@ function min_γ_CQLF(
     return γ_u, P_return
 end
 
+"""
+    tie_breaking_frobenius(γ, x, y)
+
+Applies tie-breaking rule to minimize afterwards the
+Frobenius norm of P that, for all (x, A) ∈ ω_N satisfies 
+LMIs (Ax)^T P (Ax) <= γ^2 x^T P x with already found optimal γ
+"""
 function tie_breaking_frobenius(γ, x, y)
     dim, N = size(x)
     solver = optimizer_with_attributes(Mosek.Optimizer, MOI.Silent() => true)
@@ -68,6 +103,13 @@ function tie_breaking_frobenius(γ, x, y)
     return value.(model[:P])
 end
 
+"""
+    upper_bound_CQLF(x, y, β, l, quantity; apply_tie_breaking, quantity_max)
+
+Find β-sure upper bound with CQLF method such as described in [BWJ22a] from l-steps observations
+of the states (x_i, y_i), i = 1, ..., N. quantity is 1 / p_lmin and quantity_max is 1 / p_lmax
+If apply_tie_breaking is set to false, tie_breaking_frobenius is not applied
+"""
 function upper_bound_CQLF(x, y, β, l, quantity; apply_tie_breaking = true, quantity_max = nothing)
     dim, N = size(x)
     d = dim * (dim + 1) / 2
@@ -99,8 +141,20 @@ end
 ##################### MQLF #####################
 ################################################
 
+"""
+    d(ε, dim)
+
+Quantity d(ε) = √(2-2δ(ε)) for dimension dim
+"""
 d(ε, dim) = sqrt(2 - 2 * δ(ε, dim))
 
+"""
+    find_P_MQLF(solver, γ, x, u, y, v, V; C)
+
+JuMP model to find I <= P_u <= CI, P_u in S_n, u = 1, ..., V such that 
+for all (x, (u, v, σ)) ∈ ω_N, LMIs (A_σx)^T P_v (A_σx) <= γ^2 x^T P_u x hold
+for a fixed value of γ, with specificed solver
+"""
 function find_P_MQLF(
     solver, γ, x, u, y, v, V;
     C = 1e6
@@ -123,6 +177,14 @@ function find_P_MQLF(
     return model 
 end
 
+"""
+    min_γ_MQLF(x, u, y, v, V; lb, ub, num_iter, tol)
+
+Bissection procedure with lower bound lb and upper bound ub
+to find minimal γ such that there exists I <= P_u <= CI, u = 1, ..., V that, 
+for all (x, (u, v, σ)) ∈ ω_N, satisfies LMIs (A_σx)^T P_v (A_σx) <= γ^2 x^T P_u x
+Procedure stops if iter >= num_iter or ub - lb > tol
+"""
 function min_γ_MQLF(
     x, u, y, v, V; 
     lb = 0, ub = 3, num_iter = 1000, tol = 1e-4
@@ -148,14 +210,31 @@ function min_γ_MQLF(
     return γ_u, P_return
 end
 
+"""
+    upper_bound_MQLF_one_sample(γ, η, λ_u_max, λ_u_min, λ_v_max, ε1, ε2mV2, dim)
+
+Computes upper bound for the MQLF method as described in [BWJ22b] for one specific sample
+"""
 upper_bound_MQLF_one_sample(γ, η, λ_u_max, λ_u_min, λ_v_max, ε1, ε2mV2, dim) = (
     γ + (
         sqrt(λ_u_max / λ_u_min) * γ + sqrt(λ_v_max / λ_u_min) * η / δ(ε2mV2, dim)
     ) * d(ε1, dim)
 )
 
+"""
+    lower_bound_MQLF(γ, dim)
+
+Computes the lower bound for the MQLF method as described in [BWJ22b]
+"""
 lower_bound_MQLF(γ, dim) = dim^(-1/2) * γ
 
+"""
+    bounds_MQLF(x, u, y, v, V, β1, β2, m)
+
+Computes the lower and upper bound for the MQLF method as described in [BWJ22b]
+for a CSLS with V nodes and m matrices, from observations x, u, y and v, with sub-confidence 
+levels β1 and β2 (for an overall confidence level β1 + β2 - 1)
+"""
 function bounds_MQLF(x, u, y, v, V, β1, β2, m)
     dim, N = size(x)
 
@@ -178,6 +257,7 @@ function bounds_MQLF(x, u, y, v, V, β1, β2, m)
         return lower_bound, -1
     end
 
+    # take the max for all samples
     upper_bounds = [
         upper_bound_MQLF_one_sample(γ, η, max_eigs[ui], min_eigs[ui], max_eigs[vi], ε1, ε2 * m * V / 2, dim)
         for (ui, vi) in zip(u, v)
