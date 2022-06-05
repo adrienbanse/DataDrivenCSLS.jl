@@ -4,7 +4,7 @@
   <img width="600" alt="Screenshot 2022-06-04 at 14 42 15" src="https://user-images.githubusercontent.com/45042779/171999438-d44997ef-6832-47ad-8f8a-7223aa64de18.png">
 </p>
 
-This module implements **data-driven techniques for finding probabilistic stability guarantees for hybrid systems** whose switching rule can be modelled with an automaton [BWJ22a, BWJ22b]. These systems are called constrained switching linear systems (CSLSs).
+This module implements **data-driven techniques for finding probabilistic stability guarantees for complex hybrid systems** whose switching rule can be modelled with an automaton [BWJ22a, BWJ22b]. These systems are called constrained switching linear systems (CSLSs).
 
 ## Contents
 
