@@ -21,7 +21,7 @@ Spherical cap δ(ϵ) of dimension dim
     find_P_CQLF(solver, γ, x, y, l; C)
 
 JuMP model to find I <= P <= CI, P in S_n such that 
-for all (x, A) ∈ ω_N, LMIs (Ax)^T P (Ax) <= γ^2l x^T P x hold
+for all (A, x) ∈ ω_N, LMIs (Ax)^T P (Ax) <= γ^2l x^T P x hold
 for a fixed value of γ, with specificed solver
 """
 function find_P_CQLF(
@@ -50,7 +50,7 @@ end
 
 Bissection procedure with lower bound lb and upper bound ub
 to find minimal γ such that there exists I <= P <= CI that, 
-for all (x, A) ∈ ω_N, satisfies LMIs (Ax)^T P (Ax) <= γ^2l x^T P x
+for all (A, x) ∈ ω_N, satisfies LMIs (Ax)^T P (Ax) <= γ^2l x^T P x
 Procedure stops if iter >= num_iter or ub - lb > tol
 """
 function min_γ_CQLF(
@@ -82,7 +82,7 @@ end
     tie_breaking_frobenius(γ, x, y)
 
 Applies tie-breaking rule to minimize afterwards the
-Frobenius norm of P that, for all (x, A) ∈ ω_N satisfies 
+Frobenius norm of P that, for all (A, x) ∈ ω_N satisfies 
 LMIs (Ax)^T P (Ax) <= γ^2 x^T P x with already found optimal γ
 """
 function tie_breaking_frobenius(γ, x, y)
@@ -152,7 +152,7 @@ d(ε, dim) = sqrt(2 - 2 * δ(ε, dim))
     find_P_MQLF(solver, γ, x, u, y, v, V; C)
 
 JuMP model to find I <= P_u <= CI, P_u in S_n, u = 1, ..., V such that 
-for all (x, (u, v, σ)) ∈ ω_N, LMIs (A_σx)^T P_v (A_σx) <= γ^2 x^T P_u x hold
+for all ((u, v, σ), x) ∈ ω_N, LMIs (A_σx)^T P_v (A_σx) <= γ^2 x^T P_u x hold
 for a fixed value of γ, with specificed solver
 """
 function find_P_MQLF(
@@ -182,7 +182,7 @@ end
 
 Bissection procedure with lower bound lb and upper bound ub
 to find minimal γ such that there exists I <= P_u <= CI, u = 1, ..., V that, 
-for all (x, (u, v, σ)) ∈ ω_N, satisfies LMIs (A_σx)^T P_v (A_σx) <= γ^2 x^T P_u x
+for all ((u, v, σ), x) ∈ ω_N, satisfies LMIs (A_σx)^T P_v (A_σx) <= γ^2 x^T P_u x
 Procedure stops if iter >= num_iter or ub - lb > tol
 """
 function min_γ_MQLF(
