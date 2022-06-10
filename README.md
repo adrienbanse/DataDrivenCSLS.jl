@@ -66,6 +66,6 @@ This module was created in the context of my master's thesis at UCLouvain:
 **Subtitle** "From arbitrary to constrained switching linear systems: a step towards complexity"\
 **Supervisor** Raphaël M. Jungers
 
-[BWJ22a] Adrien Banse, Zheming Wang, and Raphaël M. Jungers. Learning stability guarantees for data-driven constrained switching linear systems. _25th International Symposium on Mathematical Theory of Networks and Systems_ (Bayreuth, Germany). Submitted (pre-print: https://arxiv.org/abs/2205.00696)
+[BWJ22a] Adrien Banse, Zheming Wang, and Raphaël M. Jungers. Learning stability guarantees for data-driven constrained switching linear systems. _25th International Symposium on Mathematical Theory of Networks and Systems_ (Bayreuth, Germany). Accepted (pre-print: https://arxiv.org/abs/2205.00696)
 
 [BWJ22b] Adrien Banse, Zheming Wang, and Raphaël M. Jungers. Black-box stability analysis of hybrid systems with sample-based multiple Lyapunov functions. _61st IEEE Conference on Decision and Control_ (Cancùn, Mexico). Submitted (pre-print: https://arxiv.org/abs/2205.00699)
